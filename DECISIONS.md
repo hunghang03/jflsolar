@@ -236,3 +236,14 @@ Revisit if the business grows to several editors working on the same records.
 - Layout: mobile shows the photo as a band above the text; desktop is a split
   with the photo on the left (technicians visible) fading into the slate text
   panel. The line-drawn system schematic was removed.
+
+## D15 — Hostinger edition in a separate repository (2026-10-18)
+
+JFL Solar bought Hostinger web hosting, which cannot run this Next.js app (no
+Node.js on their plan). The site was rebuilt as a Laravel 13 / PHP 8.3 / MySQL
+edition in a separate repository (`jflsolar-php`) with the same design, pages and
+admin; staff sign in with email + password (no Google, no email dependency) and
+inquiries are stored in the admin. This repository stays live on Vercel +
+Supabase until the switch-over; its content, staff list and media are copied with
+the PHP edition's `jfl:copy-from-supabase` command. See that repository's
+DECISIONS.md (H1–H6) and docs/HOSTINGER.md.
