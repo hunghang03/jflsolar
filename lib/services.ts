@@ -31,12 +31,12 @@ export const services: { key: string; title: string; icon: IconName; body: strin
 
 export const processSteps = [
   {
-    title: "Assessment",
-    body: "We review your electricity bills, loads and goals, then assess the roof or site to confirm what is feasible.",
-  },
-  {
     title: "Consultancy",
     body: "We explain on-grid, hybrid and off-grid options and the trade-offs, so the system matches how you use power.",
+  },
+  {
+    title: "Assessment",
+    body: "We review your electricity bills, loads and goals, then assess the roof or site to confirm what is feasible.",
   },
   {
     title: "Proposal",

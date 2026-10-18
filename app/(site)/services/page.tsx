@@ -42,7 +42,7 @@ export default async function ServicesPage() {
       <PageHeader
         eyebrow="Solar services"
         title="Solar PV for homes, businesses and industry"
-        intro="Assessment, consultancy, installation and after-sales support — or equipment only, if you have your own installer."
+        intro="Consultancy, assessment, installation and after-sales support — or equipment only, if you have your own installer."
       >
         <div className="flex flex-wrap gap-3">
           <ButtonLink href={quoteHref}>Request a Quote</ButtonLink>

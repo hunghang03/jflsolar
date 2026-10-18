@@ -178,7 +178,7 @@ export default async function HomePage() {
           dark
           id="process-title"
           eyebrow="How a project works"
-          title="From assessment to after-sales support"
+          title="From consultancy to after-sales support"
           intro="Scheduling, site assessment, delivery charges and feasibility are confirmed during quotation."
         />
         <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
