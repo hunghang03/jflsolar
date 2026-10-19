@@ -16,12 +16,15 @@ export function MediaImage({
   className = "",
   priority = false,
   scope = "public",
+  fit = "cover",
 }: {
   asset: MediaAsset;
   sizes: string;
   className?: string;
   priority?: boolean;
   scope?: "public" | "admin";
+  /** "contain" for product shots on white; "cover" crops to fill the frame. */
+  fit?: "cover" | "contain";
 }) {
   const widths = [...asset.widths].sort((a, b) => a - b);
   const largest = widths.at(-1) ?? 1280;
@@ -38,7 +41,7 @@ export function MediaImage({
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : undefined}
       decoding="async"
-      className={`h-full w-full object-cover ${className}`}
+      className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"} ${className}`}
     />
   );
 }

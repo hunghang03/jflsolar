@@ -98,3 +98,22 @@ test("media paths are strictly validated", () => {
   assert.equal(parseMediaPath(`${ok}/999.webp`.split("/")), null);
   assert.equal(parseMediaPath(`secret/${ok.split("/").slice(1).join("/")}/640.webp`.split("/")), null);
 });
+
+test("page text: defaults, overrides, list lines and input cleaning", async () => {
+  const { PAGE_TEXT_DEFAULTS, TEXT_PAGES, cleanText, lines, textGetter } = await import("../../lib/page-text");
+  const t = textGetter({ "home.hero.title": "Edited" });
+  assert.equal(t("home.hero.title"), "Edited");
+  assert.equal(t("home.hero.intro"), PAGE_TEXT_DEFAULTS["home.hero.intro"]);
+  assert.deepEqual(lines("- One\n\n• Two \n  three"), ["One", "Two", "three"]);
+
+  const keys = TEXT_PAGES.flatMap((p) => p.groups.flatMap((g) => g.fields.map((f) => f.key)));
+  assert.equal(new Set(keys).size, keys.length, "each field appears once in the admin");
+  assert.deepEqual([...keys].sort(), Object.keys(PAGE_TEXT_DEFAULTS).sort(), "every default is editable and every field has a default");
+
+  const line = { key: "home.hero.title" as const, label: "Headline", kind: "line" as const };
+  const list = { key: "home.path1.points" as const, label: "Points", kind: "list" as const };
+  assert.deepEqual(cleanText(line, "  Two\r\nlines  "), { value: "Two lines" });
+  assert.deepEqual(cleanText(list, "a\r\n\r\n- b\n"), { value: "a\nb" });
+  assert.ok("error" in cleanText(line, "x".repeat(161)));
+  assert.ok("error" in cleanText(list, Array.from({ length: 9 }, (_, i) => `p${i}`).join("\n")));
+});

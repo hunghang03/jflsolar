@@ -4,6 +4,7 @@ import { isProductionSite } from "@/lib/env";
 import type { PublicPackage } from "@/lib/types";
 import { SampleBadge } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icon";
+import { MediaImage, PlaceholderImage } from "@/components/ui/Media";
 import { PriceBlock } from "./PriceBlock";
 import { SpecRow } from "./SpecRow";
 
@@ -23,21 +24,37 @@ export function PackageCard({
   pkg,
   headingLevel = "h3",
   compareForm,
+  showImage = false,
+  mediaScope = "public",
 }: {
   pkg: PublicPackage;
   headingLevel?: "h2" | "h3";
   /** id of a GET form to attach a compare checkbox to */
   compareForm?: string;
+  /** Show the cover photo (or a labelled placeholder) at the top of the card. */
+  showImage?: boolean;
+  mediaScope?: "public" | "admin";
 }) {
   const H = headingLevel;
   const headingId = `pkg-${pkg.slug}`;
+  const image = pkg.images.find((m) => m.is_cover) ?? pkg.images[0];
   return (
     <article
       aria-labelledby={headingId}
-      className={`row-span-6 grid grid-rows-subgrid gap-y-0 rounded-[var(--radius-panel)] border bg-white p-5 sm:p-6 ${
+      className={`${showImage ? "row-span-7" : "row-span-6"} grid grid-rows-subgrid gap-y-0 overflow-hidden rounded-[var(--radius-panel)] border bg-white p-5 sm:p-6 ${
         pkg.package_type === "installed_system" ? "border-steel-300" : "border-gold-200"
       }`}
     >
+      {showImage && (
+        // Fixed frame: the photo is positioned inside it, so every card's image area is the same height.
+        <div className="relative -mx-5 -mt-5 mb-5 aspect-[16/10] border-b border-steel-200 bg-white sm:-mx-6 sm:-mt-6">
+          {image ? (
+            <MediaImage scope={mediaScope} asset={image} sizes="(min-width: 1024px) 380px, (min-width: 768px) 50vw, 100vw" fit="contain" className="absolute inset-0" />
+          ) : (
+            <PlaceholderImage label="Package photo pending" className="absolute inset-0" />
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <PackageTypeTag type={pkg.package_type} />
         {pkg.system_type && <span className="text-xs font-semibold tracking-wide text-steel-600 uppercase">{systemTypeLabel[pkg.system_type]}</span>}
@@ -71,7 +88,7 @@ export function PackageCard({
               name="p"
               value={pkg.slug}
               form={compareForm}
-              className="size-5 rounded border-steel-400 accent-steel-900"
+              className="size-5 rounded border-steel-500 accent-steel-900"
               data-compare
             />
             Compare <span className="sr-only">{pkg.name}</span>

@@ -18,9 +18,9 @@ export function ProductCard({ product, mediaScope = "public" }: { product: Publi
   const image = product.images.find((m) => m.is_cover) ?? product.images[0];
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-[var(--radius-panel)] border border-steel-200 bg-white transition-shadow hover:shadow-md">
-      <div className="aspect-[4/3] bg-steel-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-steel-100">
         {image ? (
-          <MediaImage scope={mediaScope} asset={image} sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 100vw" className="object-contain bg-white" />
+          <MediaImage scope={mediaScope} asset={image} sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 100vw" fit="contain" className="absolute inset-0 bg-white" />
         ) : (
           <PlaceholderImage label="Product photo pending" icon={productGlyph(product.category?.slug)} />
         )}

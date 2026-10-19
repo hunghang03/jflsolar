@@ -57,7 +57,7 @@ async function List({ searchParams }: Pick<PageProps<"/admin/products">, "search
       .filter(Boolean)
       .join(" · "),
   }));
-  const field = "min-h-11 rounded-[var(--radius-control)] border border-steel-400 bg-white px-3 text-base";
+  const field = "min-h-11 rounded-[var(--radius-control)] border border-steel-500 bg-white px-3 text-base";
   return (
     <>
       <form method="get" role="search" aria-label="Find products" className="mb-5 flex flex-wrap items-end gap-2 rounded-[var(--radius-panel)] border border-steel-200 bg-white p-3">

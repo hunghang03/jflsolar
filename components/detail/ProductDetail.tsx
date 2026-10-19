@@ -96,7 +96,7 @@ export function ProductDetail({ product, settings, mediaScope = "public" }: { pr
           <div className="space-y-3 lg:col-start-1 lg:row-start-1">
             <div className={`${cover ? "aspect-square" : "aspect-[16/9] sm:aspect-[4/3] lg:aspect-square"} overflow-hidden rounded-[var(--radius-panel)] border border-steel-200 bg-white`}>
               {cover ? (
-                <MediaImage scope={mediaScope} asset={cover} sizes="(min-width: 1024px) 560px, 100vw" priority className="object-contain" />
+                <MediaImage scope={mediaScope} asset={cover} sizes="(min-width: 1024px) 560px, 100vw" priority fit="contain" />
               ) : (
                 <PlaceholderImage label="Product photo pending" icon={productGlyph(product.category?.slug)} />
               )}
@@ -105,7 +105,7 @@ export function ProductDetail({ product, settings, mediaScope = "public" }: { pr
               <ul className="grid grid-cols-4 gap-2" aria-label="More images">
                 {rest.map((img) => (
                   <li key={img.id} className="aspect-square overflow-hidden rounded border border-steel-200 bg-white">
-                    <MediaImage scope={mediaScope} asset={img} sizes="140px" className="object-contain" />
+                    <MediaImage scope={mediaScope} asset={img} sizes="140px" fit="contain" />
                   </li>
                 ))}
               </ul>

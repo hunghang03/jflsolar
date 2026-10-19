@@ -3,6 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { isProductionSite, isSupabaseConfigured } from "../env";
 import { createPublicClient } from "../supabase/clients";
 import { manilaToday, promoState } from "../pricing";
+import { isPageTextKey, textGetter, type PageTexts } from "../page-text";
 import {
   demoCategories,
   demoContentBlocks,
@@ -36,6 +37,8 @@ export interface PublicSnapshot {
   packages: PublicPackage[];
   products: PublicProduct[];
   projects: PublicProject[];
+  /** Staff edits to page wording (Admin → Page text); missing keys use the defaults. */
+  texts: PageTexts;
   /** Images attached to visible content blocks, keyed by block key. */
   blockImages: Record<string, MediaAsset[]>;
 }
@@ -77,6 +80,7 @@ interface RawContent {
   products: Product[];
   projects: Project[];
   media: MediaAsset[];
+  texts: PageTexts;
 }
 
 function loadDemo(): RawContent {
@@ -94,6 +98,7 @@ function loadDemo(): RawContent {
     products: demoProducts.map((p) => ({ ...p, admin_notes: undefined })),
     projects: demoProjects.map((p) => ({ ...p, admin_notes: undefined })),
     media: [],
+    texts: {},
   };
 }
 
@@ -101,7 +106,7 @@ async function loadFromDatabase(): Promise<RawContent> {
   const db = createPublicClient();
   // Column lists are runtime strings; cast past supabase-js select-string typing.
   const select = (table: string, cols: string) => db.from(table).select(cols as "*");
-  const [settings, blocks, categories, packages, products, projects, media] = await Promise.all([
+  const [settings, blocks, categories, packages, products, projects, media, texts] = await Promise.all([
     select("site_settings", COLS.settings).eq("id", 1).maybeSingle(),
     select("content_blocks", COLS.blocks),
     select("product_categories", COLS.categories),
@@ -109,10 +114,13 @@ async function loadFromDatabase(): Promise<RawContent> {
     select("products", COLS.products),
     select("projects", COLS.projects),
     select("media_assets", COLS.media),
+    select("page_texts", "key, value"),
   ]);
   for (const r of [settings, blocks, categories, packages, products, projects, media]) {
     if (r.error) throw new Error(`Content query failed: ${r.error.message}`);
   }
+  // Before the page_texts migration is applied the table is missing: use the default wording.
+  if (texts.error && !isMissingTable(texts.error)) throw new Error(`Content query failed: ${texts.error.message}`);
   if (!settings.data) throw new Error("site_settings row is missing — run supabase/seed.sql or insert settings in the admin.");
   return {
     source: "database",
@@ -123,7 +131,19 @@ async function loadFromDatabase(): Promise<RawContent> {
     products: (products.data ?? []).map(numericPrice) as Product[],
     projects: (projects.data ?? []).map((p) => ({ ...p, system_size_kwp: num(p.system_size_kwp) })) as Project[],
     media: (media.data ?? []) as MediaAsset[],
+    texts: toPageTexts((texts.data ?? []) as unknown as { key: string; value: string }[]),
   };
+}
+
+/** PostgREST "table/function not in schema cache" / Postgres "undefined table/function". */
+export function isMissingTable(error: { code?: string }) {
+  return error.code === "PGRST205" || error.code === "PGRST202" || error.code === "42P01" || error.code === "42883";
+}
+
+function toPageTexts(rows: { key: string; value: string }[]): PageTexts {
+  const out: PageTexts = {};
+  for (const r of rows) if (isPageTextKey(r.key) && r.value) out[r.key] = r.value;
+  return out;
 }
 
 // PostgREST returns numeric columns as numbers or strings depending on size.
@@ -182,7 +202,7 @@ export function applyPublicRules(raw: RawContent, today: string): PublicSnapshot
     (blockImages[m.content_block_key!] ??= []).push(m);
   }
 
-  return { source: raw.source, settings: raw.settings, blocks, categories, packages, products, projects, blockImages };
+  return { source: raw.source, settings: raw.settings, blocks, categories, packages, products, projects, blockImages, texts: raw.texts };
 }
 
 // ---------------------------------------------------------------------------
@@ -191,6 +211,11 @@ export function applyPublicRules(raw: RawContent, today: string): PublicSnapshot
 
 export async function getSettings() {
   return (await getPublicSnapshot()).settings;
+}
+
+/** Page wording with fallback to the original copy: `const t = await getPageText(); t("home.hero.title")`. */
+export async function getPageText() {
+  return textGetter((await getPublicSnapshot()).texts);
 }
 
 export async function getBlocks(section: ContentBlock["section"]) {

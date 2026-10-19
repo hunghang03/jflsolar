@@ -75,7 +75,7 @@ async function PackageList({ searchParams }: Pick<PageProps<"/packages">, "searc
         {shown.length ? (
           <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {shown.map((pkg) => (
-              <PackageCard key={pkg.id} pkg={pkg} headingLevel="h2" compareForm="compare-form" />
+              <PackageCard key={pkg.id} pkg={pkg} headingLevel="h2" compareForm="compare-form" showImage />
             ))}
           </div>
         ) : (

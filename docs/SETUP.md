@@ -41,7 +41,8 @@ two-project production setup for the eventual handover.
    in this order:
    1. `supabase/migrations/20261011000100_initial_schema.sql`
    2. `supabase/migrations/20261011000200_admin_integrity.sql`
-   3. `supabase/seed.sql` (sample content, contact details, categories)
+   3. `supabase/migrations/20261019000100_page_texts.sql` (editable page wording)
+   4. `supabase/seed.sql` (sample content, contact details, categories)
    Then check *Table Editor* shows `packages`, `products`, … and *Storage* shows a
    private bucket `media`.
 3. **Google sign-in** — follow section 2 below with this one project. Redirect URLs:

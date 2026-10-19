@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/content/public";
 import { contactChannels } from "@/lib/contact";
-import { quoteHref, telHref } from "@/lib/site";
-import { Icon } from "@/components/ui/Icon";
+import { quoteHref } from "@/lib/site";
 import { Logo } from "./Logo";
 import { DesktopNav } from "./NavLinks";
 import { MobileMenu } from "./MobileMenu";
@@ -19,13 +18,6 @@ export async function SiteHeader() {
         <Logo priority />
         <div className="ml-auto flex items-center gap-1 lg:gap-4">
           <DesktopNav />
-          <a
-            href={telHref(settings.phone_e164)}
-            className="hidden min-h-11 items-center gap-2 px-2 text-sm font-semibold text-steel-800 hover:text-steel-950 xl:inline-flex"
-          >
-            <Icon name="phone" className="size-4 text-gold-800" />
-            <span className="tabular">{settings.phone_display}</span>
-          </a>
           <Link
             href={quoteHref}
             className="inline-flex min-h-11 items-center rounded-[var(--radius-control)] bg-gold-500 px-3.5 text-sm font-semibold whitespace-nowrap text-steel-950 hover:bg-gold-400 sm:px-4 sm:text-[0.95rem]"

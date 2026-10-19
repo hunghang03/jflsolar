@@ -105,7 +105,7 @@ export function SettingsForm({ values, version }: { values: Record<string, strin
 export function AddStaffForm() {
   const [state, action, pending] = useActionState(addStaff, initialFormState);
   const v = state.status === "error" ? state.values ?? {} : {};
-  const input = "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-400 bg-white px-3 text-base";
+  const input = "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-500 bg-white px-3 text-base";
   return (
     <form key={state.attempt} action={action} className="grid gap-4 rounded-[var(--radius-panel)] border border-steel-200 bg-white p-5 sm:grid-cols-3">
       <h2 className="text-lg font-bold text-steel-950 sm:col-span-3">Add a staff member</h2>

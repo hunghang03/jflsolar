@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useAdminField } from "./AdminForm";
 
 const control =
-  "w-full rounded-[var(--radius-control)] border border-steel-400 bg-white px-3 text-base text-steel-950 focus:border-steel-900 aria-[invalid=true]:border-danger-700";
+  "w-full rounded-[var(--radius-control)] border border-steel-500 bg-white px-3 text-base text-steel-950 focus:border-steel-900 aria-[invalid=true]:border-danger-700";
 
 function Wrap({ name, label, hint, error, required, children, className = "" }: { name: string; label: string; hint?: ReactNode; error?: string; required?: boolean; children: ReactNode; className?: string }) {
   return (

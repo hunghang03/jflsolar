@@ -22,6 +22,8 @@ Verified 2026-10-14 on Vercel (https://jflsolar.vercel.app, SITE_ENV unset = pre
 - [x] Product: create + publish, fake PDF rejected, real datasheet uploaded and downloadable from the public product page, archive + delete
 - [x] Settings save (unchanged values)
 
+- [ ] 2026-10-19 change (header phone, package photos, Page text): run `supabase/migrations/20261019000100_page_texts.sql` on the live project, then test Admin → Page text signed in
+
 Still pending:
 - [ ] Projects, categories, content blocks and staff pages against the live project (same code paths as packages/products)
 - [ ] Concurrency under real parallel load (rate limit, last-owner lock)

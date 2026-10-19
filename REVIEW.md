@@ -158,3 +158,15 @@ accepted deferral). Rounds 3–5 rechecked the open items against the diff plus 
 - [x] MINOR — Same image guidance everywhere → tailored per packages/products/projects/founder.
 - [x] MINOR — Empty new package reported "URL slug is required" → name error only.
 - [x] MINOR — Founder editor buried text below photo/delete → content, photo, then danger section.
+
+## Round C1 — Header phone, package photos, editable page text (Codex, 2026-10-19)
+
+Code review of the change plus screenshots of `/packages` (1366 and 390 px).
+**Round 1: FAIL** (1 MAJOR, 1 MINOR) → **Round 2: FAIL** (both partly open) →
+**Round 3: PASS** (1 MINOR follow-up, fixed).
+
+- [x] MAJOR — Version check and writes were separate requests, so concurrent saves could overwrite each other → `save_page_texts()` checks the version under an advisory lock and deletes/upserts in the same transaction; `page_texts_load()` returns values and version from one snapshot; the form takes its next version from the same reload as its values.
+- [x] MINOR — Some wording on the three pages stayed hard-coded (button and link labels, “Often suits:”, “Prefer to talk? Call”, “Only need equipment?”, “listed”) → all editable. Left fixed on purpose: screen-reader-only headings, hero photo alt text, SEO descriptions.
+
+Evidence: `npm run check` (lint, typecheck, 22 tests incl. 4 new page-text policy/unit tests), `next build`, axe clean on Home/Services/About/Packages/Products, no overflow at 320 px.
+Not verified: the admin editor in a signed-in browser session (Google sign-in) and the live Supabase migration — both after deployment.

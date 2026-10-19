@@ -243,3 +243,65 @@ test("admin integrity functions: cover, media reorder and record reorder are sta
   await assert.rejects(asRole(db, "authenticated", EDITOR, () => db.query(`select public.record_move('staff_members', $1, 1)`, [second])), /invalid table/);
   await assert.rejects(asRole(db, "authenticated", STRANGER, () => db.query(`select public.record_move('packages', $1, 1)`, [second])), /not allowed/);
 });
+
+test("page text: everyone reads it, only active staff change it, and values are bounded", async () => {
+  const db = await setup();
+  await db.exec(`insert into public.page_texts (key, value) values ('home.hero.title', 'Edited headline')`);
+  const anonRead = await asRole(db, "anon", null, () => db.query<{ value: string }>(`select value from public.page_texts where key = 'home.hero.title'`));
+  assert.equal(anonRead.rows[0]?.value, "Edited headline");
+  await assert.rejects(asRole(db, "anon", null, () => db.query(`update public.page_texts set value = 'hacked'`)), /permission denied/);
+  await assert.rejects(asRole(db, "anon", null, () => db.query(`insert into public.page_texts (key, value) values ('home.hero.intro', 'x')`)), /permission denied/);
+
+  for (const outsider of [STRANGER, REVOKED, UNCONFIRMED]) {
+    await assert.rejects(
+      asRole(db, "authenticated", outsider, () => db.query(`insert into public.page_texts (key, value) values ('home.hero.intro', 'x')`)),
+      /row-level security/,
+    );
+    await asRole(db, "authenticated", outsider, () => db.query(`delete from public.page_texts`));
+  }
+  assert.equal(await count(db, `select count(*)::int as n from public.page_texts`), 1, "outsiders cannot delete");
+
+  await asRole(db, "authenticated", EDITOR, () =>
+    db.query(`insert into public.page_texts (key, value) values ('home.hero.title', 'By editor') on conflict (key) do update set value = excluded.value`),
+  );
+  const row = await db.query<{ value: string; updated_by: string }>(`select value, updated_by from public.page_texts where key = 'home.hero.title'`);
+  assert.equal(row.rows[0]?.value, "By editor");
+  assert.equal(row.rows[0]?.updated_by, EDITOR);
+
+  await assert.rejects(db.query(`insert into public.page_texts (key, value) values ('Bad Key', 'x')`), /check constraint/);
+  await assert.rejects(db.query(`insert into public.page_texts (key, value) values ('home.x', '   ')`), /check constraint/);
+  await assert.rejects(db.query(`insert into public.page_texts (key, value) values ('home.y', repeat('a', 1201))`), /check constraint/);
+});
+
+test("page text saves are atomic: version checked under a lock, staff only, keys limited to the page", async () => {
+  const db = await setup();
+  const keys = `array['home.hero.title','home.hero.intro']`;
+  const version = async () => (await db.query<{ v: string }>(`select public.page_texts_version(${keys}) as v`)).rows[0]!.v;
+  const save = (who: string, v: string, set: string, del = `array[]::text[]`, k = keys) =>
+    asRole(db, "authenticated", who, () => db.query<{ v: string }>(`select public.save_page_texts(${k}, '${v}', '${set}'::jsonb, ${del}) as v`));
+
+  const v0 = await version();
+  assert.equal(v0, "none");
+  const r1 = await save(EDITOR, v0, `{"home.hero.title":"First"}`);
+  const v1 = r1.rows[0]!.v;
+  assert.notEqual(v1, v0);
+  await assert.rejects(save(OWNER, v0, `{"home.hero.title":"Late"}`), /stale_version/, "a save based on an old version is refused");
+  await assert.rejects(save(STRANGER, v1, `{"home.hero.title":"Hack"}`), /not_staff/);
+  await assert.rejects(save(OWNER, v1, `{"about.why.title":"Other page"}`), /key_outside_page/);
+  await assert.rejects(asRole(db, "anon", null, () => db.query(`select public.save_page_texts(${keys}, 'none', '{}'::jsonb, array[]::text[])`)), /permission denied/);
+
+  const r2 = await save(OWNER, v1, `{"home.hero.intro":"Intro"}`, `array['home.hero.title']`);
+  const rows = (await db.query<{ key: string; value: string }>(`select key, value from public.page_texts order by key`)).rows;
+  assert.deepEqual(rows, [{ key: "home.hero.intro", value: "Intro" }]);
+  assert.equal(r2.rows[0]!.v, await version());
+});
+
+test("page text load returns values and version from one snapshot", async () => {
+  const db = await setup();
+  await db.exec(`insert into public.page_texts (key, value) values ('home.hero.title', 'T'), ('about.why.title', 'Other')`);
+  const keys = `array['home.hero.title','home.hero.intro']`;
+  const res = (await asRole(db, "authenticated", EDITOR, () => db.query<{ j: { version: string; rows: Record<string, string> } }>(`select public.page_texts_load(${keys}) as j`))).rows[0]!.j;
+  assert.deepEqual(res.rows, { "home.hero.title": "T" });
+  assert.equal(res.version, (await db.query<{ v: string }>(`select public.page_texts_version(${keys}) as v`)).rows[0]!.v);
+  await assert.rejects(asRole(db, "anon", null, () => db.query(`select public.page_texts_load(${keys})`)), /permission denied/);
+});

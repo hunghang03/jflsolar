@@ -16,7 +16,7 @@ export const metadata = pageMetadata({
 });
 
 const field =
-  "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-400 bg-white px-3 text-base text-steel-900 focus:border-steel-900";
+  "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-500 bg-white px-3 text-base text-steel-900 focus:border-steel-900";
 
 export default function ProductsPage({ searchParams }: PageProps<"/products">) {
   return (

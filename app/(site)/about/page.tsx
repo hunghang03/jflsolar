@@ -1,6 +1,7 @@
 import { getPublicSnapshot } from "@/lib/content/public";
 import { pageMetadata } from "@/lib/seo";
 import { quoteHref } from "@/lib/site";
+import { textGetter } from "@/lib/page-text";
 import type { ContentBlock, MediaAsset } from "@/lib/types";
 import { ButtonLink } from "@/components/ui/Button";
 import { MediaImage } from "@/components/ui/Media";
@@ -15,7 +16,8 @@ export const metadata = pageMetadata({
 });
 
 export default async function AboutPage() {
-  const { blocks, settings, blockImages } = await getPublicSnapshot();
+  const { blocks, settings, blockImages, texts } = await getPublicSnapshot();
+  const t = textGetter(texts);
   const get = (key: string) => blocks.find((b) => b.key === key);
   const intro = get("about.intro");
   const history = get("about.history");
@@ -30,7 +32,7 @@ export default async function AboutPage() {
 
   return (
     <>
-      <PageHeader eyebrow="About us" title={intro?.title ?? "About JFL Solar"} intro={settings.service_area} />
+      <PageHeader eyebrow={t("about.header.eyebrow")} title={intro?.title ?? "About JFL Solar"} intro={settings.service_area} />
 
       <Section labelledBy="story-title">
         <div className="grid gap-10 lg:grid-cols-2">
@@ -94,7 +96,7 @@ export default async function AboutPage() {
             </div>
             <div>
               <p className="flex flex-wrap items-center gap-3 text-sm font-semibold tracking-wide text-gold-800 uppercase">
-                <span className="rule-gold" aria-hidden="true" /> Founder
+                <span className="rule-gold" aria-hidden="true" /> {t("about.founder.eyebrow")}
                 <ClaimMarker block={founder} />
               </p>
               <h2 id="founder-title" className="mt-3 text-3xl font-extrabold text-steel-950">
@@ -109,7 +111,7 @@ export default async function AboutPage() {
 
       {why.length > 0 && (
         <Section tone="muted" labelledBy="why-title">
-          <SectionHeading id="why-title" eyebrow="Why choose us" title="Quality, warranty assistance and support" />
+          <SectionHeading id="why-title" eyebrow={t("about.why.eyebrow")} title={t("about.why.title")} />
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {why.map((b) => (
               <BlockPanel key={b.key} block={b} image={blockImages[b.key]?.[0]} />
@@ -134,14 +136,14 @@ export default async function AboutPage() {
       <Section labelledBy="warranty-title">
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
-            <SectionHeading id="warranty-title" eyebrow="Warranty" title="Warranty information" />
+            <SectionHeading id="warranty-title" eyebrow={t("about.warranty.eyebrow")} title={t("about.warranty.title")} />
             <p className="mt-4 text-steel-700">{settings.general_warranty || "Warranty terms to be confirmed."}</p>
           </div>
           <div>
-            <h2 className="mb-4 text-xl font-bold text-steel-950">Where to find us</h2>
+            <h2 className="mb-4 text-xl font-bold text-steel-950">{t("about.location.title")}</h2>
             <Addresses settings={settings} />
             <ButtonLink href={quoteHref} className="mt-6">
-              Request a Quote
+              {t("about.contact.button")}
             </ButtonLink>
           </div>
         </div>

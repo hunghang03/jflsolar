@@ -1,81 +1,50 @@
-// Service copy based on the owner-confirmed scope: installation, consultancy
-// and equipment distribution. No savings, payback or performance guarantees.
+// Service structure (icons, links, order). The wording is editable in
+// Admin → Page text (lib/page-text.ts). No savings, payback or performance guarantees.
 import type { IconName } from "@/components/ui/Icon";
+import type { PageTextKey } from "./page-text";
 
-export const services: { key: string; title: string; icon: IconName; body: string; href: string; cta: string }[] = [
-  {
-    key: "installation",
-    title: "Solar installation",
-    icon: "tools",
-    body: "Supply, installation and commissioning of solar PV systems for homes, commercial buildings and industrial sites.",
-    href: "/services#installation",
-    cta: "How installation works",
-  },
-  {
-    key: "consultancy",
-    title: "Consultancy",
-    icon: "bolt",
-    body: "Advice on system type, sizing and equipment, from a first conversation to a written proposal.",
-    href: "/services#consultancy",
-    cta: "About consultancy",
-  },
-  {
-    key: "equipment",
-    title: "Equipment distribution",
-    icon: "battery",
-    body: "Panels, inverters, batteries, mounting hardware, cabling and protection devices for DIY buyers and professional installers.",
-    href: "/products",
-    cta: "Browse equipment",
-  },
+type Get = (key: PageTextKey) => string;
+
+const SERVICE_LINKS: { icon: IconName; href: string }[] = [
+  { icon: "tools", href: "/services#installation" },
+  { icon: "bolt", href: "/services#consultancy" },
+  { icon: "battery", href: "/products" },
 ];
 
-export const processSteps = [
-  {
-    title: "Consultancy",
-    body: "We explain on-grid, hybrid and off-grid options and the trade-offs, so the system matches how you use power.",
-  },
-  {
-    title: "Assessment",
-    body: "We review your electricity bills, loads and goals, then assess the roof or site to confirm what is feasible.",
-  },
-  {
-    title: "Proposal",
-    body: "You receive a written proposal with the system design, equipment list, inclusions, exclusions and price.",
-  },
-  {
-    title: "Installation",
-    body: "Mounting, panels, inverter, batteries, cabling and protection devices are installed to the agreed design.",
-  },
-  {
-    title: "Commissioning",
-    body: "The system is tested, configured and handed over, with a walkthrough of how to monitor it.",
-  },
-  {
-    title: "After-sales support",
-    body: "Help with settings, troubleshooting and warranty coordination after handover. Terms are stated in your quotation.",
-  },
-] as const;
+export const services = (t: Get) =>
+  SERVICE_LINKS.map((s, i) => {
+    const n = i + 1;
+    return {
+      ...s,
+      key: `service${n}`,
+      title: t(`home.service${n}.title` as PageTextKey),
+      body: t(`home.service${n}.body` as PageTextKey),
+      cta: t(`home.service${n}.link` as PageTextKey),
+    };
+  });
 
-export const systemTypes = [
-  {
-    key: "on_grid",
-    title: "On-grid",
-    lead: "Lower daytime bills",
-    body: "Solar power is used first and the grid covers the rest. No battery, so it does not provide power during an outage. Usually the simplest system.",
-    suits: "Homes and businesses with high daytime use and a reliable grid.",
-  },
-  {
-    key: "hybrid",
-    title: "Hybrid",
-    lead: "Savings plus backup",
-    body: "Solar with a battery and a grid connection. Stored energy can run essential loads at night or during outages.",
-    suits: "Homes and businesses that want backup power for outages.",
-  },
-  {
-    key: "off_grid",
-    title: "Off-grid",
-    lead: "Independent power",
-    body: "Solar and batteries with no grid connection. The system must be sized for every load and season, so assessment is essential.",
-    suits: "Sites without a grid connection, or where a connection is impractical.",
-  },
-] as const;
+export const processSteps = (t: Get) =>
+  [1, 2, 3, 4, 5, 6].map((n) => ({ title: t(`services.step${n}.title` as PageTextKey), body: t(`services.step${n}.body` as PageTextKey) }));
+
+export const audiences = (t: Get) =>
+  (["residential", "commercial", "industrial"] as const).map((id, i) => {
+    const n = i + 1;
+    return {
+      id,
+      title: t(`services.audience${n}.title` as PageTextKey),
+      body: t(`services.audience${n}.body` as PageTextKey),
+      points: t(`services.audience${n}.points` as PageTextKey),
+    };
+  });
+
+export const systemTypes = (t: Get) =>
+  (["on_grid", "hybrid", "off_grid"] as const).map((key, i) => {
+    const n = i + 1;
+    return {
+      key,
+      lead: t(`services.type${n}.lead` as PageTextKey),
+      title: t(`services.type${n}.title` as PageTextKey),
+      body: t(`services.type${n}.body` as PageTextKey),
+      suits: t(`services.type${n}.suits` as PageTextKey),
+    };
+  });

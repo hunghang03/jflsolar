@@ -206,7 +206,7 @@ function FormBody({
           required
           aria-invalid={e.name ? true : undefined}
           aria-describedby={describe(e.name && "f-name-error")}
-          className={`${input} border-steel-400`}
+          className={`${input} border-steel-500`}
         />
       </Field>
 
@@ -232,7 +232,7 @@ function FormBody({
               maxLength={FIELD_LIMITS.phone}
               aria-invalid={e.phone || e.contact ? true : undefined}
               aria-describedby={describe(e.phone && "f-phone-error", e.contact && "contact-error")}
-              className={`${input} border-steel-400 tabular`}
+              className={`${input} border-steel-500 tabular`}
             />
           </Field>
           <Field id="f-email" label="Email" error={e.email}>
@@ -246,7 +246,7 @@ function FormBody({
               maxLength={FIELD_LIMITS.email}
               aria-invalid={e.email || e.contact ? true : undefined}
               aria-describedby={describe(e.email && "f-email-error", e.contact && "contact-error")}
-              className={`${input} border-steel-400`}
+              className={`${input} border-steel-500`}
             />
           </Field>
         </div>
@@ -261,7 +261,7 @@ function FormBody({
           required
           aria-invalid={e.inquiry_type ? true : undefined}
           aria-describedby={describe(e.inquiry_type && "f-type-error")}
-          className={`${input} border-steel-400`}
+          className={`${input} border-steel-500`}
         >
           <option value="">Choose one…</option>
           {inquiryTypes.map((t) => (
@@ -281,7 +281,7 @@ function FormBody({
             defaultValue={v.location}
             maxLength={FIELD_LIMITS.location}
             aria-describedby={describe("f-location-hint", e.location && "f-location-error")}
-            className={`${input} border-steel-400`}
+            className={`${input} border-steel-500`}
           />
         </Field>
         {BILL_RELEVANT.has(type) && (
@@ -292,7 +292,7 @@ function FormBody({
               defaultValue={v.bill_range}
               aria-invalid={e.bill_range ? true : undefined}
               aria-describedby={describe("f-bill-hint", e.bill_range && "f-bill-error")}
-              className={`${input} border-steel-400`}
+              className={`${input} border-steel-500`}
             >
               {billRanges.map((b) => (
                 <option key={b.value} value={b.value}>
@@ -315,7 +315,7 @@ function FormBody({
           onChange={(ev) => setMessageLength(ev.currentTarget.value.length)}
           aria-invalid={e.message ? true : undefined}
           aria-describedby={describe("f-message-hint", e.message && "f-message-error", "f-message-count")}
-          className={`${input} border-steel-400 py-3`}
+          className={`${input} border-steel-500 py-3`}
         />
         <p id="f-message-count" className="mt-1 text-right text-xs text-steel-600 tabular">
           {messageLength} / {FIELD_LIMITS.message}

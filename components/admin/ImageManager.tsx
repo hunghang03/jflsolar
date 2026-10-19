@@ -10,7 +10,7 @@ const MAX_DIM = 2560;
 const TARGET_BYTES = 3.5 * 1024 * 1024;
 const btn =
   "inline-flex min-h-11 items-center justify-center rounded-[var(--radius-control)] border border-steel-300 bg-white px-3 text-sm font-semibold text-steel-900 hover:border-steel-900 disabled:opacity-40";
-const input = "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-400 bg-white px-3 text-base";
+const input = "min-h-11 w-full rounded-[var(--radius-control)] border border-steel-500 bg-white px-3 text-base";
 
 /**
  * Downsizes large photos in the browser so uploads stay under the server

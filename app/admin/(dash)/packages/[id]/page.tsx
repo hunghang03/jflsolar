@@ -55,7 +55,7 @@ async function Editor({ params }: Pick<PageProps<"/admin/packages/[id]">, "param
           <span aria-hidden="true">▸</span> Show saved card preview
         </summary>
         <div className="mt-3 max-w-sm">
-          <PackageCard pkg={{ ...pkg, promo_state: promo, images }} />
+          <PackageCard pkg={{ ...pkg, promo_state: promo, images: images.filter((m) => m.kind === "image") }} showImage mediaScope="admin" />
         </div>
       </details>
 
