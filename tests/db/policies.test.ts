@@ -305,3 +305,51 @@ test("page text load returns values and version from one snapshot", async () => 
   assert.equal(res.version, (await db.query<{ v: string }>(`select public.page_texts_version(${keys}) as v`)).rows[0]!.v);
   await assert.rejects(asRole(db, "anon", null, () => db.query(`select public.page_texts_load(${keys})`)), /permission denied/);
 });
+
+test("inquiries: only the server can add them, staff read and update status/notes, archived ones can be deleted", async () => {
+  const db = await setup();
+  const key = "a".repeat(48);
+  const insert = `insert into public.inquiries (submission_key, name, phone, inquiry_type, message) values ('${key}', 'Ana', '09171234567', 'residential', 'Hello there, quote please')`;
+  await assert.rejects(asRole(db, "anon", null, () => db.query(insert)), /permission denied/);
+  await assert.rejects(asRole(db, "authenticated", EDITOR, () => db.query(insert)), /permission denied/);
+  await asRole(db, "service_role", null, () => db.query(insert));
+  await asRole(db, "service_role", null, () => db.query(`${insert} on conflict (submission_key) do nothing`));
+  assert.equal(await count(db, `select count(*)::int as n from public.inquiries`), 1, "a resubmitted form is stored once");
+
+  await assert.rejects(asRole(db, "anon", null, () => db.query(`select * from public.inquiries`)), /permission denied/);
+  for (const outsider of [STRANGER, REVOKED]) {
+    const seen = await asRole(db, "authenticated", outsider, () => db.query(`select id from public.inquiries`));
+    assert.equal(seen.rows.length, 0, "non-staff see nothing");
+  }
+  const seen = await asRole(db, "authenticated", EDITOR, () => db.query<{ name: string }>(`select name from public.inquiries`));
+  assert.equal(seen.rows[0]?.name, "Ana");
+
+  await assert.rejects(asRole(db, "authenticated", EDITOR, () => db.query(`update public.inquiries set message = 'changed'`)), /permission denied/);
+  await asRole(db, "authenticated", EDITOR, () => db.query(`update public.inquiries set status = 'handled', staff_notes = 'Called back'`));
+  await asRole(db, "authenticated", EDITOR, () => db.query(`delete from public.inquiries`));
+  assert.equal(await count(db, `select count(*)::int as n from public.inquiries`), 1, "only archived inquiries can be deleted");
+  await asRole(db, "authenticated", EDITOR, () => db.query(`update public.inquiries set status = 'archived'`));
+  await asRole(db, "authenticated", STRANGER, () => db.query(`delete from public.inquiries`));
+  assert.equal(await count(db, `select count(*)::int as n from public.inquiries`), 1, "outsiders cannot delete");
+  await asRole(db, "authenticated", EDITOR, () => db.query(`delete from public.inquiries`));
+  assert.equal(await count(db, `select count(*)::int as n from public.inquiries`), 0);
+
+  await assert.rejects(
+    db.query(`insert into public.inquiries (submission_key, name, inquiry_type, message) values ('${"b".repeat(48)}', 'No contact', 'other', 'Message here')`),
+    /check constraint/,
+    "a phone number or email is required",
+  );
+});
+
+test("tables added after the initial schema keep only their intended privileges (Supabase defaults revoked)", async () => {
+  const db = await setup();
+  const priv = async (role: string, table: string, p: string) =>
+    (await db.query<{ ok: boolean }>(`select has_table_privilege('${role}', 'public.${table}', '${p}') as ok`)).rows[0]!.ok;
+  for (const p of ["INSERT", "UPDATE", "DELETE", "TRUNCATE", "SELECT"]) assert.equal(await priv("anon", "inquiries", p), false, `anon ${p} inquiries`);
+  for (const p of ["INSERT", "UPDATE", "DELETE", "TRUNCATE"]) assert.equal(await priv("anon", "page_texts", p), false, `anon ${p} page_texts`);
+  for (const p of ["INSERT", "TRUNCATE"]) assert.equal(await priv("authenticated", "inquiries", p), false, `authenticated ${p} inquiries`);
+  assert.equal(await priv("authenticated", "page_texts", "TRUNCATE"), false);
+  const col = (c: string) => db.query<{ ok: boolean }>(`select has_column_privilege('authenticated', 'public.inquiries', '${c}', 'UPDATE') as ok`).then((r) => r.rows[0]!.ok);
+  assert.equal(await col("message"), false, "staff cannot rewrite a customer's message");
+  assert.equal(await col("status"), true);
+});

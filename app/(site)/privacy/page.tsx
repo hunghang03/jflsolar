@@ -47,11 +47,11 @@ export default async function PrivacyPage() {
           </section>
 
           <section>
-            <h2>How it is sent and stored</h2>
+            <h2>How it is stored</h2>
             <ul>
               <li>
-                Your inquiry is sent to our business inbox by an email delivery service. The website itself does not save the content of your inquiry
-                in its database.
+                Your inquiry is saved in this website&apos;s database, which only signed-in JFL Solar staff can view, and a copy may be emailed to our
+                business inbox.
               </li>
               <li>
                 To prevent spam and abuse, the website records a one-way, salted fingerprint of your IP address with the time of submission. It cannot
@@ -59,7 +59,7 @@ export default async function PrivacyPage() {
                 next time the form is used.
               </li>
               <li>Our hosting provider may keep standard technical access logs for security and reliability.</li>
-              <li>Inquiry emails are kept in our mailbox for as long as needed to handle your request and any resulting quotation or sale.</li>
+              <li>We keep inquiries for as long as needed to handle your request and any resulting quotation or sale, then delete them.</li>
             </ul>
           </section>
 

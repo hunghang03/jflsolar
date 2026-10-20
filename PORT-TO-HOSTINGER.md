@@ -84,3 +84,21 @@ released to Hostinger.
 - Product cards: image absolutely positioned in a fixed 4:3 frame (equal card heights).
 - Form control borders `steel-400` → `steel-500` (≈4.4:1 contrast) in admin fields,
   image manager, settings/staff inputs, product filters, inquiry form, compare checkbox.
+
+---
+
+## 2026-10-20 — Inquiries saved in the admin (Vercel catches up with Hostinger)
+
+The Hostinger edition already saves inquiries (Admin → Inquiries, email alert
+optional), so there is little to port. Check for parity:
+
+- **Demo notice:** Vercel now shows the “Demo form” notice only when neither saving
+  (Supabase + secret key) nor email is configured. PHP never shows it — no change.
+- **Admin:** same tabs (New / Handled / Archived with counts), detail page, status
+  buttons, staff notes, delete only when archived. Vercel added paging (50 per page,
+  `?page=N`); the PHP list already paginates with Laravel’s paginator — no change.
+- **Privacy page:** Vercel now uses the PHP wording (“saved in this website’s
+  database … a copy may be emailed”) — no change.
+- **Permissions:** Vercel revokes Supabase’s default table privileges on new tables
+  (`inquiries`, `page_texts`). MySQL has no equivalent API roles — not applicable.
+  ☐ nothing to port

@@ -13,7 +13,9 @@ create trigger page_texts_touch before update on public.page_texts
 
 alter table public.page_texts enable row level security;
 
--- Public site wording: anyone may read; only staff may change it.
+-- Public site wording: anyone may read; only staff may change it. Remove the
+-- default privileges new tables get first, then grant only what is needed.
+revoke all on public.page_texts from anon, authenticated;
 grant select (key, value, updated_at) on public.page_texts to anon;
 grant select, insert, update, delete on public.page_texts to authenticated;
 create policy page_texts_public_read on public.page_texts for select to anon using (true);

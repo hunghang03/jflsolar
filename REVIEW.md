@@ -170,3 +170,17 @@ Code review of the change plus screenshots of `/packages` (1366 and 390 px).
 
 Evidence: `npm run check` (lint, typecheck, 22 tests incl. 4 new page-text policy/unit tests), `next build`, axe clean on Home/Services/About/Packages/Products, no overflow at 320 px.
 Not verified: the admin editor in a signed-in browser session (Google sign-in) and the live Supabase migration — both after deployment.
+
+## Round C2 — Inquiries saved in the admin (Codex, 2026-10-20)
+
+Owner asked to remove the “Demo form” notice. Email delivery was never configured on
+Vercel, so removing it alone would have discarded every inquiry; inquiries are now
+saved in Supabase and listed under Admin → Inquiries (parity with the Hostinger edition).
+**Round 1: FAIL** (2 MAJOR, 1 MINOR) → **Round 2: PASS**.
+
+- [x] MAJOR — New tables kept Supabase’s default privileges (staff could rewrite a customer’s message; anon held TRUNCATE) → `revoke all` before the intended grants on `inquiries` and `page_texts`; the test harness now applies Supabase-like default privileges and a test asserts the remaining privileges.
+- [x] MAJOR — Saving inquiries could run with the published development signing secret → the secret is required whenever inquiries are saved or emailed, and in production.
+- [x] MINOR — Inquiry list capped at 50 → paginated (newest first, stable order, tab kept).
+
+Evidence: `npm run check` (24 tests), `next build`, contact page renders without the notice locally.
+Not verified: a real submission against the live database (after the SQL is run).

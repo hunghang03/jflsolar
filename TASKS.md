@@ -23,6 +23,7 @@ Verified 2026-10-14 on Vercel (https://jflsolar.vercel.app, SITE_ENV unset = pre
 - [x] Settings save (unchanged values)
 
 - [ ] 2026-10-19 change (header phone, package photos, Page text): run `supabase/migrations/20261019000100_page_texts.sql` on the live project, then test Admin → Page text signed in
+- [ ] 2026-10-20 inquiries: run `supabase/migrations/20261020000100_inquiries.sql` on the live project, deploy, send one test inquiry and check Admin → Inquiries
 
 Still pending:
 - [ ] Projects, categories, content blocks and staff pages against the live project (same code paths as packages/products)

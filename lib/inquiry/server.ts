@@ -53,8 +53,8 @@ export type RateResult = "ok" | "client_limited" | "global_limited" | "unavailab
 
 /**
  * Shared, persistent limiter (Postgres via the service-role key). Fails CLOSED:
- * if the limiter cannot be reached no email is sent and the visitor is pointed
- * to phone/WhatsApp/Viber. Only called when live delivery is configured.
+ * if the limiter cannot be reached nothing is saved or sent and the visitor is pointed
+ * to phone/WhatsApp/Viber. Called whenever inquiries are saved or emailed.
  */
 export async function rateCheck(ip: string): Promise<RateResult> {
   const db = createServiceClient();
@@ -73,6 +73,34 @@ export async function rateCheck(ip: string): Promise<RateResult> {
     return "unavailable";
   }
   return data;
+}
+
+// ---------------------------------------------------------------------------
+// Storage for Admin → Inquiries (service-role key; the public has no access)
+// ---------------------------------------------------------------------------
+export type SaveResult = { ok: true } | { ok: false; reason: "not_configured" | "db_error" };
+
+export async function saveInquiry(v: InquiryValues, itemLabel: string | null, nonce: string): Promise<SaveResult> {
+  const db = createServiceClient();
+  if (!db) return { ok: false, reason: "not_configured" };
+  const row = {
+    submission_key: idempotencyKey(nonce, v),
+    name: v.name,
+    phone: v.phone || null,
+    email: v.email || null,
+    inquiry_type: v.inquiry_type,
+    location: v.location || null,
+    bill_range: v.bill_range || null,
+    item_label: itemLabel,
+    message: v.message,
+  };
+  // A resubmitted form (same token and values) is stored once.
+  const { error } = await db.from("inquiries").upsert(row, { onConflict: "submission_key", ignoreDuplicates: true });
+  if (error) {
+    console.error("[inquiry] could not save:", error.code ?? "unknown");
+    return { ok: false, reason: "db_error" };
+  }
+  return { ok: true };
 }
 
 // ---------------------------------------------------------------------------

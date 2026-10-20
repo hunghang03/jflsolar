@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { getPublicSnapshot, getSettings } from "@/lib/content/public";
-import { isInquiryDeliveryConfigured } from "@/lib/env.server";
+import { isInquiryDeliveryConfigured, isInquiryStorageConfigured } from "@/lib/env.server";
 import { emptyInquiry, type InquiryValues } from "@/lib/inquiry/schema";
 import { issueToken } from "@/lib/inquiry/server";
 import { pageMetadata } from "@/lib/seo";
@@ -78,7 +78,7 @@ async function QuoteForm({ searchParams }: Pick<PageProps<"/contact">, "searchPa
           The item you selected is no longer available. You can still send us a general inquiry.
         </p>
       )}
-      <InquiryForm initialValues={initial} token={issueToken()} demo={!isInquiryDeliveryConfigured} quickContacts={quickContacts} />
+      <InquiryForm initialValues={initial} token={issueToken()} demo={!isInquiryStorageConfigured && !isInquiryDeliveryConfigured} quickContacts={quickContacts} />
     </>
   );
 }

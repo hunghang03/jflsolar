@@ -2,9 +2,9 @@
 
 import { headers } from "next/headers";
 import { getPublicSnapshot } from "@/lib/content/public";
-import { isInquiryDeliveryConfigured } from "@/lib/env.server";
+import { isInquiryDeliveryConfigured, isInquiryStorageConfigured } from "@/lib/env.server";
 import { emptyInquiry, readInquiry, validateInquiry } from "@/lib/inquiry/schema";
-import { MIN_FILL_MS, checkToken, deliverInquiry, issueToken, rateCheck } from "@/lib/inquiry/server";
+import { MIN_FILL_MS, checkToken, deliverInquiry, issueToken, rateCheck, saveInquiry } from "@/lib/inquiry/server";
 import type { InquiryState } from "@/lib/inquiry/state";
 
 export async function submitInquiry(prev: InquiryState, formData: FormData): Promise<InquiryState> {
@@ -15,7 +15,7 @@ export async function submitInquiry(prev: InquiryState, formData: FormData): Pro
   // Honeypot: real visitors never see or fill this field. Bots get a neutral
   // response and nothing is sent.
   if (String(formData.get("website") ?? "").trim()) {
-    return { ...base, values: emptyInquiry, status: isInquiryDeliveryConfigured ? "sent" : "demo", message: null };
+    return { ...base, values: emptyInquiry, status: isInquiryStorageConfigured || isInquiryDeliveryConfigured ? "sent" : "demo", message: null };
   }
 
   const tokenCheck = checkToken(token);
@@ -55,12 +55,12 @@ export async function submitInquiry(prev: InquiryState, formData: FormData): Pro
     return { ...base, status: "invalid", errors, message: "Please correct the highlighted fields." };
   }
 
-  if (!isInquiryDeliveryConfigured) {
-    // Demo mode: validated, never sent anywhere.
+  if (!isInquiryStorageConfigured && !isInquiryDeliveryConfigured) {
+    // Demo mode (no database secret key and no email): validated, never stored or sent.
     return {
       ...base,
       status: "demo",
-      message: "Demo only — this inquiry was checked but NOT sent. Inquiry email delivery has not been set up yet.",
+      message: "Demo only — this inquiry was checked but NOT sent. Inquiry saving has not been set up yet.",
     };
   }
 
@@ -80,8 +80,11 @@ export async function submitInquiry(prev: InquiryState, formData: FormData): Pro
     };
   }
 
-  const delivered = await deliverInquiry(values, itemLabel, tokenCheck.nonce);
-  if (!delivered.ok) {
+  // Saved for Admin → Inquiries; the email alert (when configured) is extra. The visitor
+  // sees "sent" if at least one of them worked.
+  const stored = isInquiryStorageConfigured ? await saveInquiry(values, itemLabel, tokenCheck.nonce) : null;
+  const emailed = isInquiryDeliveryConfigured ? await deliverInquiry(values, itemLabel, tokenCheck.nonce) : null;
+  if (!stored?.ok && !emailed?.ok) {
     return {
       ...base,
       status: "error",

@@ -9,6 +9,10 @@ const notices: Record<string, string> = {
   reordered: "Order updated.",
   saved: "Saved.",
   staff_updated: "Staff list updated.",
+  inquiry_new: "Marked as new.",
+  inquiry_handled: "Marked as handled.",
+  inquiry_archived: "Archived. You can delete it permanently once you no longer need it.",
+  notes_saved: "Notes saved.",
   owners_only: "That page is available to owners only.",
 };
 

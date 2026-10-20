@@ -39,8 +39,8 @@ export async function createSessionClient(): Promise<SupabaseClient> {
 }
 
 /**
- * Service-role client: bypasses RLS. Used ONLY for the inquiry rate-limit RPC
- * (and the out-of-band admin bootstrap script). Never pass user input as SQL.
+ * Service-role client: bypasses RLS. Used ONLY for the inquiry rate-limit RPC, saving
+ * inquiries (and the out-of-band admin bootstrap script). Never pass user input as SQL.
  */
 export function createServiceClient(): SupabaseClient | null {
   if (!isSupabaseConfigured || !serviceRoleKey) return null;

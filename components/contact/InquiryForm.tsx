@@ -116,7 +116,7 @@ function FormBody({
       {demo && (
         <div id="demo-note" className="rounded-[var(--radius-control)] border-2 border-dashed border-gold-600 bg-gold-50 p-4 text-steel-900">
           <p className="font-bold">Demo form — submissions are not delivered.</p>
-          <p className="mt-1 text-sm">Inquiry email has not been set up yet, so nothing typed here will be sent. To reach JFL Solar now:</p>
+          <p className="mt-1 text-sm">Inquiry saving has not been set up on this copy of the website, so nothing typed here will be kept. To reach JFL Solar now:</p>
           {quickContacts.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2">
               {quickContacts.map((c) => (
