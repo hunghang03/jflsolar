@@ -51,7 +51,9 @@ export function PackageCard({
           {image ? (
             <MediaImage scope={mediaScope} asset={image} sizes="(min-width: 1024px) 380px, (min-width: 768px) 50vw, 100vw" fit="contain" className="absolute inset-0" />
           ) : (
-            <PlaceholderImage label="Package photo pending" className="absolute inset-0" />
+            <div className="absolute inset-0">
+              <PlaceholderImage label="Package photo pending" />
+            </div>
           )}
         </div>
       )}

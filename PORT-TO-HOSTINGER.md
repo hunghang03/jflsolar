@@ -9,14 +9,14 @@ released to Hostinger.
 
 ## 2026-10-19 — Header phone, package photos, editable page text
 
-### 1. Header: phone number removed  ☐ ported
+### 1. Header: phone number removed  ☑ ported 2026-10-28
 - **Next.js:** `components/layout/SiteHeader.tsx` — removed the phone link (icon +
   `0969 471 2098`) between the navigation and “Request a Quote”. The mobile menu
   contacts, footer, Contact page and Services call-to-action still show the number.
 - **PHP:** `resources/views/partials/site-header.blade.php` — remove the `tel:` link
   (phone icon + `phone_display`) next to the desktop nav.
 
-### 2. Package cards show the cover photo on the Solar Packages page  ☐ ported
+### 2. Package cards show the cover photo on the Solar Packages page  ☑ ported 2026-10-28
 - **Next.js:** `components/catalog/PackageCard.tsx` gets `showImage` (+ `mediaScope`).
   Cover image (or first image) at the top of the card in a fixed 16:10 frame,
   image absolutely positioned with `object-contain` on white; no photo →
@@ -32,7 +32,7 @@ released to Hostinger.
   pass `show-image` from `pages/packages.blade.php` and the admin package preview.
   `$pkg->images` is already loaded by `PublicContent`.
 
-### 3. Page text editable in the admin (Home, Solar Services, About)  ☐ ported
+### 3. Page text editable in the admin (Home, Solar Services, About)  ☑ ported 2026-10-28
 - **New table** `page_texts (key text PK, value text 1–1200 chars, updated_at, updated_by)`
   — `supabase/migrations/20261019000100_page_texts.sql`. Public read; staff
   insert/update/delete (RLS). A missing row = original wording. Functions
@@ -101,4 +101,20 @@ optional), so there is little to port. Check for parity:
   database … a copy may be emailed”) — no change.
 - **Permissions:** Vercel revokes Supabase’s default table privileges on new tables
   (`inquiries`, `page_texts`). MySQL has no equivalent API roles — not applicable.
-  ☐ nothing to port
+  ☑ nothing to port; `jfl:copy-from-supabase` now also copies `inquiries` (2026-10-28)
+
+---
+
+## 2026-10-28 — Port to the Hostinger edition done (jflsolar-php)
+
+Entries 1–3 ported and tested (PHP tests 23/23, browser e2e 47/47, Codex H3 PASS).
+PHP specifics: the registry `app/Support/PageTextData.php` is generated from
+`lib/page-text.ts` — when a field is added here, add it there too (same key,
+default, label). Form field names use `__` instead of dots (PHP turns dots in POST
+names into underscores). Version token = md5 of the page’s key=value pairs; saving
+runs under `Cache::lock` + a transaction. Existing Hostinger installs import
+`upgrade-2026-10-28.sql` (it ships in the release zip).
+
+Found while porting and fixed here too: the “Package photo pending” placeholder was
+given `absolute` on top of its own `relative` class; it is now wrapped in an
+absolutely positioned div (no visible change while every package has a photo).
